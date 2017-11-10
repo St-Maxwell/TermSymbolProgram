@@ -1,6 +1,6 @@
-PROGRAM Term_assistant ! 2017/10/6 459�� // 2017/10/7 457��
+PROGRAM TermSymbolProgram
 implicit none
-    ! main arrays
+    ! 定义5种角量子数的轨道的轨道角量子数和自旋磁量子数
     integer :: mL_s(2)=(/0,0/)                  
     real :: mS_s(2)=(/0.5,-0.5/)
     integer :: mL_p(6)=(/1,1,0,0,-1,-1/)                  
@@ -11,6 +11,7 @@ implicit none
     real :: mS_f(14)=(/0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5/)
     integer :: mL_g(18)=(/4,4,3,3,2,2,1,1,0,0,-1,-1,-2,-2,-3,-3,-4,-4/)                  
     real :: mS_g(18)=(/0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5/)
+    ! 计算过程中用于储存各角动量的轨道的所有组合形式及后续输出
     integer,allocatable :: ML_s_comb(:),ML_p_comb(:),ML_d_comb(:),ML_f_comb(:),ML_g_comb(:)
     real,allocatable :: MS_s_comb(:),MS_p_comb(:),MS_d_comb(:),MS_f_comb(:),MS_g_comb(:)
     integer,allocatable :: ML(:)
@@ -19,7 +20,7 @@ implicit none
     real,allocatable :: MS_NET(:)
     integer,allocatable :: TABLE(:,:) 
     integer,allocatable :: TABLE_out(:,:)
-    ! parameters
+    ! 计算中的一些参数，包括一个计算阶乘的函数
     integer :: n1=0
     integer :: n2=0
     integer :: n3=0
@@ -28,7 +29,7 @@ implicit none
     integer :: ncomb,ncomb_s,ncomb_p,ncomb_d,ncomb_f,ncomb_g
     real,external :: Factorial
     integer,allocatable :: comb_s(:),comb_p(:),comb_d(:),comb_f(:),comb_g(:)
-    ! counters
+    ! 大多为临时变量
     integer :: counter_out
     common counter_out
     integer :: i,j,k,l,m,n,counter1,counter2 
@@ -269,6 +270,7 @@ implicit none
     write(*,*) "Finished, press Enter to exit"
     read(*,*)
     stop
+    
     contains
     recursive subroutine gen_s(m)
         implicit none
@@ -385,7 +387,7 @@ implicit none
         end if
     end subroutine gen_g
 
-END PROGRAM Term_assistant
+END PROGRAM TermSymbolProgram
 
 real function Factorial(z)
     implicit none
