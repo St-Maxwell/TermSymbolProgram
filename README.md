@@ -1,4 +1,4 @@
-# TermSymbolProgram
+# Term Symbol Program
 
 本程序可求解大部分电子组态的原子光谱项。
 
