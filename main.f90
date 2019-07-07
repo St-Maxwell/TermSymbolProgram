@@ -247,4 +247,6 @@ program main
   call print_table(table, L_set, S_set, unique_L, unique_S)
   call print_term_symbol(table, unique_L, unique_S)
 
+  read(*,*)
+  
 end program
