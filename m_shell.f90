@@ -2,7 +2,7 @@ module m_shell
   use m_combination
   implicit none
   private
-  public s_shell, p_shell, d_shell, f_shell, g_shell
+  public :: shell, s_shell, p_shell, d_shell, f_shell, g_shell
 
   type :: spin_orb
     integer :: mag_qn
@@ -14,18 +14,32 @@ module m_shell
     real :: S = 0
   end type
 
-  type :: shell
-    private
+  type, abstract :: shell
     integer :: num_occ = 0
-  end type
-
-  type, extends(shell) :: s_shell
-    type(spin_orb), dimension(2) :: orbs
+    type(spin_orb), dimension(:), allocatable :: orbs
     integer(kind=long) :: num_comb
     type(combination), dimension(:), allocatable :: comb
     contains
-      ! set the occupation number of shell
-      procedure, public :: set_nocc => set_nocc_s
+      procedure(initialize_shell), deferred :: initialize
+      procedure(get_combination_shell), deferred :: get_combination
+  end type
+
+  abstract interface
+    subroutine initialize_shell(this, n_occ)
+      import shell
+      class(shell), intent(inout) :: this
+      integer, intent(in) :: n_occ
+    end subroutine
+
+    subroutine get_combination_shell(this)
+      import shell
+      class(shell), intent(inout) :: this
+    end subroutine
+  end interface
+
+  type, extends(shell) :: s_shell
+    ! no extra attribute
+    contains
       ! initialize spin orbitals
       ! calculate the number of microstates
       ! allocate ?_shell%comb
@@ -36,112 +50,42 @@ module m_shell
   end type
     
   type, extends(shell) :: p_shell
-    type(spin_orb), dimension(6) :: orbs
-    integer(kind=long) :: num_comb
-    type(combination), dimension(:), allocatable :: comb
     contains
-      procedure, public :: set_nocc => set_nocc_p
       procedure, public :: initialize => initialize_sub_p
       procedure, public :: get_combination => get_combination_p
   end type
 
   type, extends(shell) :: d_shell
-    type(spin_orb), dimension(10) :: orbs
-    integer(kind=long) :: num_comb
-    type(combination), dimension(:), allocatable :: comb
     contains
-      procedure, public :: set_nocc => set_nocc_d
       procedure, public :: initialize => initialize_sub_d
       procedure, public :: get_combination => get_combination_d
   end type
 
   type, extends(shell) :: f_shell
-    type(spin_orb), dimension(14) :: orbs
-    integer(kind=long) :: num_comb
-    type(combination), dimension(:), allocatable :: comb
     contains
-      procedure, public :: set_nocc => set_nocc_f
       procedure, public :: initialize => initialize_sub_f
       procedure, public :: get_combination => get_combination_f
   end type
 
   type, extends(shell) :: g_shell
-    type(spin_orb), dimension(18) :: orbs
-    integer(kind=long) :: num_comb
-    type(combination), dimension(:), allocatable :: comb
     contains
-      procedure, public :: set_nocc => set_nocc_g
       procedure, public :: initialize => initialize_sub_g
       procedure, public :: get_combination => get_combination_g
   end type
 
   contains
-
-  subroutine set_nocc_s(this, n_occ)
+  subroutine initialize_sub_s(this, n_occ)
     implicit none
-    class(s_shell) :: this
+    class(s_shell), intent(inout) :: this
     integer, intent(in) :: n_occ
 
-    if (n_occ > 2) then
-      stop "the number of occupation is out of range"
-    end if
+    if (n_occ > 2) stop "the number of occupation is out of range"
     this%num_occ = n_occ
 
-  end subroutine
-
-  subroutine set_nocc_p(this, n_occ)
-    implicit none
-    class(p_shell) :: this
-    integer, intent(in) :: n_occ
-
-    if (n_occ > 6) then
-      stop "the number of occupation is out of range"
-    end if
-    this%num_occ = n_occ
-    
-  end subroutine
-
-  subroutine set_nocc_d(this, n_occ)
-    implicit none
-    class(d_shell) :: this
-    integer, intent(in) :: n_occ
-
-    if (n_occ > 10) then
-      stop "the number of occupation is out of range"
-    end if
-    this%num_occ = n_occ
-    
-  end subroutine
-
-  subroutine set_nocc_f(this, n_occ)
-    implicit none
-    class(f_shell) :: this
-    integer, intent(in) :: n_occ
-
-    if (n_occ > 14) then
-      stop "the number of occupation is out of range"
-    end if
-    this%num_occ = n_occ
-    
-  end subroutine
-
-  subroutine set_nocc_g(this, n_occ)
-    implicit none
-    class(g_shell) :: this
-    integer, intent(in) :: n_occ
-
-    if (n_occ > 18) then
-      stop "the number of occupation is out of range"
-    end if
-    this%num_occ = n_occ
-    
-  end subroutine
-
-  subroutine initialize_sub_s(this)
-    implicit none
-    class(s_shell) :: this
-
+    if (allocated(this%orbs)) deallocate(this%orbs)
     if (allocated(this%comb)) deallocate(this%comb)
+
+    allocate( this%orbs(2) )
     this%orbs(:)%mag_qn = [0,0]
     this%orbs(:)%spin_qn = [0.5,-0.5]
     this%num_comb = combinations(2, this%num_occ)
@@ -149,11 +93,18 @@ module m_shell
 
   end subroutine
 
-  subroutine initialize_sub_p(this)
+  subroutine initialize_sub_p(this, n_occ)
     implicit none
-    class(p_shell) :: this
+    class(p_shell), intent(inout) :: this
+    integer, intent(in) :: n_occ
+
+    if (n_occ > 6) stop "the number of occupation is out of range"
+    this%num_occ = n_occ
 
     if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%comb)) deallocate(this%comb)
+
+    allocate( this%orbs(6) )
     this%orbs(:)%mag_qn = [1,1,0,0,-1,-1]
     this%orbs(:)%spin_qn = [0.5,-0.5,0.5,-0.5,0.5,-0.5]
     this%num_comb = combinations(6, this%num_occ)
@@ -161,11 +112,18 @@ module m_shell
 
   end subroutine
 
-  subroutine initialize_sub_d(this)
+  subroutine initialize_sub_d(this, n_occ)
     implicit none
-    class(d_shell) :: this
+    class(d_shell), intent(inout) :: this
+    integer, intent(in) :: n_occ
+
+    if (n_occ > 10) stop "the number of occupation is out of range"
+    this%num_occ = n_occ
 
     if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%comb)) deallocate(this%comb)
+
+    allocate( this%orbs(10) )
     this%orbs(:)%mag_qn = [2,2,1,1,0,0,-1,-1,-2,-2]
     this%orbs(:)%spin_qn = [0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5, &
                            -0.5,0.5,-0.5]
@@ -174,11 +132,18 @@ module m_shell
                                          
   end subroutine
 
-  subroutine initialize_sub_f(this)
+  subroutine initialize_sub_f(this, n_occ)
     implicit none
-    class(f_shell) :: this
+    class(f_shell), intent(inout) :: this
+    integer, intent(in) :: n_occ
+
+    if (n_occ > 14) stop "the number of occupation is out of range"
+    this%num_occ = n_occ
 
     if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%comb)) deallocate(this%comb)
+
+    allocate( this%orbs(14) )
     this%orbs(:)%mag_qn = [3,3,2,2,1,1,0,0,-1,-1,-2,-2,-3,-3]
     this%orbs(:)%spin_qn = [0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5, &
                            -0.5,0.5,-0.5,0.5,-0.5,0.5,-0.5]
@@ -187,11 +152,18 @@ module m_shell
                              
   end subroutine
 
-  subroutine initialize_sub_g(this)
+  subroutine initialize_sub_g(this, n_occ)
     implicit none
-    class(g_shell) :: this
+    class(g_shell), intent(inout) :: this
+    integer, intent(in) :: n_occ
+
+    if (n_occ > 18) stop "the number of occupation is out of range"
+    this%num_occ = n_occ
 
     if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%comb)) deallocate(this%comb)
+
+    allocate( this%orbs(18) )
     this%orbs(:)%mag_qn = [4,4,3,3,2,2,1,1,0,0,-1,-1,-2,-2, &
                           -3,-3,-4,-4]
     this%orbs(:)%spin_qn = [0.5,-0.5,0.5,-0.5,0.5,-0.5,0.5, &
@@ -204,7 +176,7 @@ module m_shell
 
   subroutine get_combination_s(this)
     implicit none
-    class(s_shell) :: this
+    class(s_shell), intent(inout) :: this
     integer, allocatable, dimension(:,:) :: C
     integer(kind=long) :: i, j
 
@@ -227,7 +199,7 @@ module m_shell
 
   subroutine get_combination_p(this)
     implicit none
-    class(p_shell) :: this
+    class(p_shell), intent(inout) :: this
     integer, allocatable, dimension(:,:) :: C
     integer(kind=long) :: i, j
 
@@ -250,7 +222,7 @@ module m_shell
 
   subroutine get_combination_d(this)
     implicit none
-    class(d_shell) :: this
+    class(d_shell), intent(inout) :: this
     integer, allocatable, dimension(:,:) :: C
     integer(kind=long) :: i, j
 
@@ -273,7 +245,7 @@ module m_shell
 
   subroutine get_combination_f(this)
     implicit none
-    class(f_shell) :: this
+    class(f_shell), intent(inout) :: this
     integer, allocatable, dimension(:,:) :: C
     integer(kind=long) :: i, j
 
@@ -296,7 +268,7 @@ module m_shell
 
   subroutine get_combination_g(this)
     implicit none
-    class(g_shell) :: this
+    class(g_shell), intent(inout) :: this
     integer, allocatable, dimension(:,:) :: C
     integer(kind=long) :: i, j
 

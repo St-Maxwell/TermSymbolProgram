@@ -13,17 +13,12 @@ program main
   type(link), pointer :: head => null()
   type(link), pointer :: tail => null()
   type(link), pointer :: ptr => null()
-  class(*), pointer :: tmp => null()
   type(s_shell), pointer :: s_define_p => null()
   type(p_shell), pointer :: p_define_p => null()
   type(d_shell), pointer :: d_define_p => null()
   type(f_shell), pointer :: f_define_p => null()
   type(g_shell), pointer :: g_define_p => null()
-  type(s_shell), pointer :: s_tmp_p => null()
-  type(p_shell), pointer :: p_tmp_p => null()
-  type(d_shell), pointer :: d_tmp_p => null()
-  type(f_shell), pointer :: f_tmp_p => null()
-  type(g_shell), pointer :: g_tmp_p => null()
+  class(shell), pointer :: shell_ptr => null()
 !-----------------------------------------------------------
   integer(kind=long), dimension(:), allocatable :: shells_num_comb
 ! the number of combinations should be less than 10^12
@@ -47,9 +42,9 @@ program main
   integer :: iL, iS
 !-----------------------------------------------------------
   write(*,*) "------------------------------------------------------"
-  write(*,*) " This program is written for determining term symbols "
+  write(*,*) "    This program aims for determining term symbols    "
   write(*,*) "               Programmed by St Maxwell               "
-  write(*,*) "                     2019-jul-7th                     "
+  write(*,*) "                    2019-jul-16th                     "
   write(*,*) "------------------------------------------------------"
   write(*,*)
   write(*,*) "Input the number of shells:"
@@ -72,38 +67,33 @@ program main
     select case(shell_type(iter))
     case('s')
       allocate(s_define_p)
-      call s_define_p%set_nocc(shell_occ(iter))
-      call s_define_p%initialize()
+      call s_define_p%initialize(shell_occ(iter))
       shells_num_comb(iter) = s_define_p%num_comb
-      tmp => s_define_p
+      shell_ptr => s_define_p
       s_define_p => null()
     case('p')
       allocate(p_define_p)
-      call p_define_p%set_nocc(shell_occ(iter))
-      call p_define_p%initialize()
+      call p_define_p%initialize(shell_occ(iter))
       shells_num_comb(iter) = p_define_p%num_comb
-      tmp => p_define_p
+      shell_ptr => p_define_p
       p_define_p => null()
     case('d')
       allocate(d_define_p)
-      call d_define_p%set_nocc(shell_occ(iter))
-      call d_define_p%initialize()
+      call d_define_p%initialize(shell_occ(iter))
       shells_num_comb(iter) = d_define_p%num_comb
-      tmp => d_define_p
+      shell_ptr => d_define_p
       d_define_p => null()
     case('f')
       allocate(f_define_p)
-      call f_define_p%set_nocc(shell_occ(iter))
-      call f_define_p%initialize()
+      call f_define_p%initialize(shell_occ(iter))
       shells_num_comb(iter) = f_define_p%num_comb
-      tmp => f_define_p
+      shell_ptr => f_define_p
       f_define_p => null()
     case('g')
       allocate(g_define_p)
-      call g_define_p%set_nocc(shell_occ(iter))
-      call g_define_p%initialize()
+      call g_define_p%initialize(shell_occ(iter))
       shells_num_comb(iter) = g_define_p%num_comb
-      tmp => g_define_p
+      shell_ptr => g_define_p
       g_define_p => null()
     end select 
 
@@ -111,12 +101,12 @@ program main
       allocate(head)
       tail => head
       tail%next => null()
-      tail%variable => tmp
+      tail%variable => shell_ptr
     else
       allocate(tail%next)
       tail => tail%next
       tail%next => null()
-      tail%variable => tmp
+      tail%variable => shell_ptr
     end if
 
     if (iter == num_shell) exit
@@ -141,55 +131,13 @@ program main
 
   do while (.true.)
     if (.not. associated(ptr)) exit
-    ! initialize shells and find microstates
-    tmp => ptr%variable
-    select type(tmp)
-    type is (s_shell)
-      s_tmp_p => tmp
-      call s_tmp_p%get_combination()
+    ! find microstates
+    shell_ptr => ptr%variable
 
-      allocate(L_shell_comb(s_tmp_p%num_comb))
-      allocate(S_shell_comb(s_tmp_p%num_comb))
-      L_shell_comb = s_tmp_p%comb(:)%L
-      S_shell_comb = s_tmp_p%comb(:)%S
-
-    type is (p_shell)
-      p_tmp_p => tmp
-      call p_tmp_p%get_combination()
-
-      allocate(L_shell_comb(p_tmp_p%num_comb))
-      allocate(S_shell_comb(p_tmp_p%num_comb))
-      L_shell_comb = p_tmp_p%comb(:)%L
-      S_shell_comb = p_tmp_p%comb(:)%S
-
-    type is (d_shell)
-      d_tmp_p => tmp
-      call d_tmp_p%get_combination()
-      
-      allocate(L_shell_comb(d_tmp_p%num_comb))
-      allocate(S_shell_comb(d_tmp_p%num_comb))
-      L_shell_comb = d_tmp_p%comb(:)%L
-      S_shell_comb = d_tmp_p%comb(:)%S
-
-    type is (f_shell)
-      f_tmp_p => tmp
-      call f_tmp_p%get_combination()
-      
-      allocate(L_shell_comb(f_tmp_p%num_comb))
-      allocate(S_shell_comb(f_tmp_p%num_comb))
-      L_shell_comb = f_tmp_p%comb(:)%L
-      S_shell_comb = f_tmp_p%comb(:)%S
-
-    type is (g_shell)
-      g_tmp_p => tmp
-      call g_tmp_p%get_combination()
-      
-      allocate(L_shell_comb(g_tmp_p%num_comb))
-      allocate(S_shell_comb(g_tmp_p%num_comb))
-      L_shell_comb = g_tmp_p%comb(:)%L
-      S_shell_comb = g_tmp_p%comb(:)%S
-
-    end select
+    call shell_ptr%get_combination()
+    L_shell_comb = shell_ptr%comb(:)%L
+    S_shell_comb = shell_ptr%comb(:)%S
+    
     ! combinate microstates of each shell
     ! to get total microstates
     istep = 1
@@ -215,8 +163,6 @@ program main
     end do
 
     ptr => ptr%next
-    deallocate(L_shell_comb)
-    deallocate(S_shell_comb)
 
   end do
 
@@ -247,6 +193,7 @@ program main
   call print_table(table, L_set, S_set, unique_L, unique_S)
   call print_term_symbol(table, unique_L, unique_S)
 
+  write(*,*) "Finished. Press Enter to exit."
   read(*,*)
   
 end program
