@@ -117,58 +117,62 @@ module m_set
     
     end subroutine
 
-    subroutine set_L(arr, set, size_set)
+    function set_of_L(arr)
     ! remove duplicates from sorted array
     ! return a set
       implicit none
+      integer, dimension(:), allocatable :: set_of_L
       integer, dimension(:), intent(in) :: arr
-      integer, dimension(size(arr)), intent(out) :: set
-      integer, intent(out) :: size_set
+      !-----------------------------------------------------
+      integer, dimension(100) :: tmp
       integer :: iter
       integer(kind=long) :: jter
 
       if (size(arr) == 1) then
-        set = arr
-        size_set = 1
+        set_of_L = arr
         return
       end if
 
-      set(1) = arr(1)
+      tmp(1) = arr(1)
       iter = 1
       do jter = 2, size(arr)
-        if (arr(jter) /= set(iter)) then
+        if (arr(jter) /= tmp(iter)) then
           iter = iter + 1
-          set(iter) = arr(jter)
+          tmp(iter) = arr(jter)
         end if
       end do
-      size_set = iter
 
-    end subroutine
+      set_of_L = tmp(:iter)
 
-    subroutine set_S(arr, set, size_set)
+    end function
+
+    function set_of_S(arr)
+    ! remove duplicates from sorted array
+    ! return a set
       implicit none
+      real, dimension(:), allocatable :: set_of_S
       real, dimension(:), intent(in) :: arr
-      real, dimension(size(arr)), intent(out) :: set
-      integer, intent(out) :: size_set
+      !-----------------------------------------------------
+      real, dimension(100) :: tmp
       integer :: iter
       integer(kind=long) :: jter
   
       if (size(arr) == 1) then
-        set = arr
-        size_set = 1
+        set_of_S = arr
         return
       end if
   
-      set(1) = arr(1)
+      tmp(1) = arr(1)
       iter = 1
       do jter = 2, size(arr)
-        if (abs(arr(jter)-set(iter)) > tol) then
+        if (abs(arr(jter)-tmp(iter)) > tol) then
           iter = iter + 1
-          set(iter) = arr(jter)
+          tmp(iter) = arr(jter)
         end if
       end do
-      size_set = iter
   
-    end subroutine
+      set_of_S = tmp(:iter)
+  
+    end function
 
 end module
