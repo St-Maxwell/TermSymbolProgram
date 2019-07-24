@@ -2,9 +2,7 @@ module m_shell
   use m_combination
   implicit none
   private
-  public :: shell, s_shell, p_shell, &
-            d_shell, f_shell, g_shell, &
-            shell_factory
+  public :: shell, shell_factory
 
   type :: spin_orb
     integer :: mag_qn
@@ -47,32 +45,32 @@ module m_shell
   type, extends(shell) :: s_shell
     ! no extra attribute
     contains
-      procedure, public :: initialize => initialize_sub_s
-      procedure, public :: get_combination => get_combination_s
+      procedure :: initialize => initialize_sub_s
+      procedure :: get_combination => get_combination_s
   end type
     
   type, extends(shell) :: p_shell
     contains
-      procedure, public :: initialize => initialize_sub_p
-      procedure, public :: get_combination => get_combination_p
+      procedure :: initialize => initialize_sub_p
+      procedure :: get_combination => get_combination_p
   end type
 
   type, extends(shell) :: d_shell
     contains
-      procedure, public :: initialize => initialize_sub_d
-      procedure, public :: get_combination => get_combination_d
+      procedure :: initialize => initialize_sub_d
+      procedure :: get_combination => get_combination_d
   end type
 
   type, extends(shell) :: f_shell
     contains
-      procedure, public :: initialize => initialize_sub_f
-      procedure, public :: get_combination => get_combination_f
+      procedure :: initialize => initialize_sub_f
+      procedure :: get_combination => get_combination_f
   end type
 
   type, extends(shell) :: g_shell
     contains
-      procedure, public :: initialize => initialize_sub_g
-      procedure, public :: get_combination => get_combination_g
+      procedure :: initialize => initialize_sub_g
+      procedure :: get_combination => get_combination_g
   end type
 
   contains
@@ -141,7 +139,7 @@ module m_shell
     if (n_occ > 6) stop "the number of occupation is out of range"
     this%num_occ = n_occ
 
-    if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%orbs)) deallocate(this%orbs)
     if (allocated(this%comb)) deallocate(this%comb)
 
     allocate( this%orbs(6) )
@@ -160,7 +158,7 @@ module m_shell
     if (n_occ > 10) stop "the number of occupation is out of range"
     this%num_occ = n_occ
 
-    if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%orbs)) deallocate(this%orbs)
     if (allocated(this%comb)) deallocate(this%comb)
 
     allocate( this%orbs(10) )
@@ -180,7 +178,7 @@ module m_shell
     if (n_occ > 14) stop "the number of occupation is out of range"
     this%num_occ = n_occ
 
-    if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%orbs)) deallocate(this%orbs)
     if (allocated(this%comb)) deallocate(this%comb)
 
     allocate( this%orbs(14) )
@@ -200,7 +198,7 @@ module m_shell
     if (n_occ > 18) stop "the number of occupation is out of range"
     this%num_occ = n_occ
 
-    if (allocated(this%comb)) deallocate(this%comb)
+    if (allocated(this%orbs)) deallocate(this%orbs)
     if (allocated(this%comb)) deallocate(this%comb)
 
     allocate( this%orbs(18) )
